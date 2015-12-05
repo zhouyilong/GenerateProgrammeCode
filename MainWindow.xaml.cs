@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System;  
+using System.Collections.Generic;  
+using System.Linq;  
+using System.Text;  
+using System.Windows;  
+using System.Windows.Controls;  
+using System.Windows.Data;  
+using System.Windows.Documents;  
+using System.Windows.Input;  
+using System.Windows.Media;  
+using System.Windows.Media.Imaging;  
+using System.Windows.Navigation;  
+using System.Windows.Shapes;  
+using System.Net;  
+using System.Configuration;  
+using System.IO;  
+using System.Diagnostics;  
+using System.Xml;  
+using ICSharpCode.SharpZipLib.Zip; 
+
 
 namespace GenerateProgrammeCode
 {
@@ -20,195 +26,307 @@ namespace GenerateProgrammeCode
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region===属性字段===
+        //更新包地址
+        private string url = "";
+        //文件名字
+        private string filename = "";
+        //下载文件存放全路径
+        private string filepath = "";
+        //更新后打开的程序名
+        string startexe = "";
+        //新版本号
+        string version = "";
+
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
+
+            if (Application.Current.Properties["startexe"] != null)
+            {
+                startexe = Application.Current.Properties["startexe"].ToString().Trim();
+            }
+
+            if (Application.Current.Properties["version"] != null)
+            {
+                version = Application.Current.Properties["version"].ToString().Trim();
+            }
+            this.Loaded += MainWindow_Loaded;
         }
 
-        //string
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+        private void Window_Activated(object sender, EventArgs e)
         {
-            string text = tb.Text;
-            if (!string.IsNullOrEmpty(text))
+            //pgbUpdate.Value++;
+
+            url = ConfigurationSettings.AppSettings["Url"].Trim();
+
+            if (url != "")
             {
-                string[] properties = text.Split(',');
+                filename = url.Substring(url.LastIndexOf("/") + 1);
+                //下载文件存放在临时文件夹中
+                filepath = Environment.GetEnvironmentVariable("TEMP") + @"/" + filename;
 
-                StringBuilder sb = new StringBuilder();
-
-                foreach (var item in properties)
+                if (filename != "")
                 {
-                    if (item.Split(':').Length == 2)
+                    try
                     {
-                        sb.Append(GetStringPropertyCode(item.Split(':')[0], item.Split(':')[1]));
-                        sb.AppendLine();
+                        KillExeProcess();
+                        DownloadFile();
+                        UnZipFile();
+                        UpdateVersionInfo();
+                        OpenUpdatedExe();
+
+                        writeLog("更新成功！");
+                    }
+                    catch (Exception ex)
+                    {
+                        writeLog(ex.Message);
+                    }
+
+                }
+                else
+                {
+                    writeLog("更新失败：下载的文件名为空！");
+                    return;
+                }
+            }
+
+            else
+            {
+                writeLog("更新失败：未在App.config中指定需要下载的文件位置！");
+            }
+
+            if (File.Exists(filepath))
+            {
+                File.Delete(filepath);
+            }
+
+            this.Close();
+        }
+
+        /// <summary>
+        /// 杀掉正在运行的需要更新的程序
+        /// </summary>
+        private void KillExeProcess()
+        {
+            //后缀起始位置
+            int startpos = -1;
+
+            try
+            {
+                if (startexe != "")
+                {
+                    if (startexe.EndsWith(".EXE"))
+                    {
+                        startpos = startexe.IndexOf(".EXE");
+                    }
+                    else if (startexe.EndsWith(".exe"))
+                    {
+                        startpos = startexe.IndexOf(".exe");
+                    }
+                    foreach (Process p in Process.GetProcessesByName(startexe.Remove(startpos)))
+                    {
+                        p.Kill();
+
                     }
                 }
-                rtb.Document.Blocks.Clear();
-                rtb.AppendText(sb.ToString());
-
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("清杀原程序进程出错：" + ex.Message);
             }
         }
 
+        //private void pgbUpdate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        //{
+        //    pgbUpdate.Dispatcher.Invoke(new Action<DependencyProperty, object>(pgbUpdate.SetValue),
+        //        System.Windows.Threading.DispatcherPriority.Background, ProgressBar.ValueProperty, pgbUpdate.Value);
+        //}
 
-
-        //datetime
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 下载更新包
+        /// </summary>
+        public void DownloadFile()
         {
-            string text = tb.Text;
-            if (!string.IsNullOrEmpty(text))
+            //pgbUpdate.Value++;
+
+            WebClient client = new WebClient();
+            try
             {
-                string[] properties = text.Split(',');
+                Uri address = new Uri(url);
 
-                StringBuilder sb = new StringBuilder();
-
-                foreach (var item in properties)
+                if (File.Exists(filepath))
                 {
-                    if (item.Split(':').Length == 2)
-                    {
-                        sb.Append(GetDatetimePropertyCode(item.Split(':')[0], item.Split(':')[1]));
-                        sb.AppendLine();
-                    }
+                    File.Delete(filepath);
                 }
-                rtb.Document.Blocks.Clear();
-                rtb.AppendText(sb.ToString());
+                client.DownloadFile(address, filepath);
 
             }
+            catch (Exception ex)
+            {
+                throw new Exception("下载更新文件出错：" + ex.Message);
+            }
+
         }
 
-        //number
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+
+        private void UpdateVersionInfo()
         {
-            string text = tb.Text;
-            if (!string.IsNullOrEmpty(text))
+            //try
+            //{
+            //    Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
+            //    cfa.AppSettings.Settings["Version"].Value = version;
+            //    cfa.Save();
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("更新版本信息出错：" + ex.Message);
+            //}
+
+        }
+
+        /// <summary>
+        /// 打开更新后的程序
+        /// </summary>
+        private void OpenUpdatedExe()
+        {
+            //try
+            //{
+            //    if (ConfigurationManager.AppSettings["StartAfterUpdate"] == "true" && startexe != "")
+            //    {
+            //        Process openupdatedexe = new Process();
+            //        openupdatedexe.StartInfo.FileName = startexe;
+            //        openupdatedexe.Start();
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("打开更新后程序出错：" + ex.Message);
+            //}
+        }
+
+        #region 不好用
+        /// <summary>
+        /// 解压压缩包，格式必须是*.zip,否则不能解压
+        /// 需要添加System32下的Shell32.dll
+        /// 不好用总是弹出来对话框
+        /// </summary>
+        //private void UnZip()
+        //{
+        //    try
+        //    {
+        //        ShellClass sc = new ShellClass();
+        //        Folder SrcFolder = sc.NameSpace(filepath);
+        //        Folder DestFolder = sc.NameSpace(System.Environment.CurrentDirectory);
+        //        FolderItems items = SrcFolder.Items();
+        //        DestFolder.CopyHere(items, 16);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("解压缩更新包出错：" + ex.Message, "提示信息", MessageBoxButton.OK, MessageBoxImage.Error);
+        //    }
+        //}
+        #endregion
+
+        #region 解压zip
+        /// <summary>
+        /// 解压压缩包，格式必须是*.zip,否则不能解压
+        /// </summary>
+        /// <returns></returns>
+        private void UnZipFile()
+        {
+            //pgbUpdate.Value++;
+
+            try
             {
-                string[] properties = text.Split(',');
-
-                StringBuilder sb = new StringBuilder();
-
-                foreach (var item in properties)
+                using (ZipInputStream zis = new ZipInputStream(File.OpenRead(filepath)))
                 {
-                    if (item.Split(':').Length == 2)
+                    ZipEntry theEntry;
+                    while ((theEntry = zis.GetNextEntry()) != null)
                     {
-                        sb.Append(GetNumberPropertyCode(item.Split(':')[0], item.Split(':')[1]));
-                        sb.AppendLine();
+                        string directoryName = System.IO.Path.GetDirectoryName(theEntry.Name);
+                        string zipfilename = System.IO.Path.GetFileName(theEntry.Name);
+
+                        if (directoryName.Length > 0 && !Directory.Exists(directoryName))
+                        {
+                            Directory.CreateDirectory(directoryName);
+                        }
+
+                        if (zipfilename != String.Empty)
+                        {
+                            using (FileStream streamWriter = File.Create(theEntry.Name))
+                            {
+                                int size = 2048;
+                                byte[] data = new byte[2048];
+                                while (true)
+                                {
+                                    size = zis.Read(data, 0, data.Length);
+                                    if (size > 0)
+                                    {
+                                        streamWriter.Write(data, 0, size);
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                rtb.Document.Blocks.Clear();
-                rtb.AppendText(sb.ToString());
-
             }
+            catch (Exception ex)
+            {
+                throw new Exception("解压缩更新包出错：" + ex.Message);
+            }
+
         }
+        #endregion
 
-
-        StringBuilder GetStringPropertyCode(string name, string note)
+        private void writeLog(string str)
         {
-            string _name = "_" + (name.ToLower().Replace("_", ""));
-            StringBuilder template = new StringBuilder();
-            template.AppendFormat("private string {0};", _name);
-            template.AppendLine();
-            template.Append("/// <summary>");
-            template.AppendLine();
-            template.AppendFormat("///{0}", note);
-            template.AppendLine();
-            template.Append("/// </summary>");
-            template.AppendLine();
-            template.AppendFormat("[Column(Storage = \"{0}\", Name = \"{1}\", DbType = \"VARCHAR2\", AutoSync = AutoSync.Never)]"
-                , _name, name);
-            template.AppendLine();
-            template.Append("[DebuggerNonUserCode()]");
-            template.AppendLine();
-            template.AppendFormat("public string {0}", name);
-            template.AppendLine();
-            template.Append("{get{");
-            template.AppendLine();
-            template.AppendFormat("return this.{0};", _name);
-            template.AppendLine();
-            template.Append("}set{");
-            template.AppendLine();
-            template.AppendFormat(" if (({0} == value) == false)",
-                _name);
-            template.AppendLine();
-            template.Append("{");
-            template.AppendLine();
-            template.AppendFormat("this.{0} = value;this.OnPropertyChanged(\"{1}\");", _name, name);
-            template.AppendLine();
-            template.Append("}}}");
 
-            return template;
+            string strLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + str + "/r/n";
+
+            StreamWriter errorlog = new StreamWriter(System.IO.Path.Combine(Environment.CurrentDirectory, @"log.txt"), true);
+            errorlog.Write(strLog);
+            errorlog.Flush();
+            errorlog.Close();
         }
 
-        StringBuilder GetDatetimePropertyCode(string name, string note)
+        #region===事件===
+        void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            string _name = "_" + (name.ToLower().Replace("_", ""));
-            StringBuilder template = new StringBuilder();
-            template.AppendFormat("private System.Nullable<System.DateTime> {0};", _name);
-            template.AppendLine();
-            template.Append("/// <summary>");
-            template.AppendLine();
-            template.AppendFormat("///{0}", note);
-            template.AppendLine();
-            template.Append("/// </summary>");
-            template.AppendLine();
-            template.AppendFormat("[Column(Storage = \"{0}\", Name = \"{1}\", DbType = \"DATE\", AutoSync = AutoSync.Never)]"
-                , _name, name);
-            template.AppendLine();
-            template.Append("[DebuggerNonUserCode()]");
-            template.AppendLine();
-            template.AppendFormat("public System.Nullable<System.DateTime> {0}", name);
-            template.AppendLine();
-            template.Append("{get{");
-            template.AppendLine();
-            template.AppendFormat("return this.{0};", _name);
-            template.AppendLine();
-            template.Append("}set{");
-            template.AppendLine();
-            template.AppendFormat(" if (({0} == value) == false)",
-                _name);
-            template.AppendLine();
-            template.Append("{");
-            template.AppendLine();
-            template.AppendFormat("this.{0} = value;this.OnPropertyChanged(\"{1}\");", _name, name);
-            template.AppendLine();
-            template.Append("}}}");
-
-            return template;
+            this.Loaded -= MainWindow_Loaded;
+            cmbViewType.ItemsSource = new List<string> { "GenerateEntity", "GenerateTabOp" };
+            
         }
 
-        StringBuilder GetNumberPropertyCode(string name, string note)
+        private void cmbViewType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string _name = "_" + (name.ToLower().Replace("_", ""));
-            StringBuilder template = new StringBuilder();
-            template.AppendFormat("private System.Nullable<decimal> {0};", _name);
-            template.AppendLine();
-            template.Append("/// <summary>");
-            template.AppendLine();
-            template.AppendFormat("///{0}", note);
-            template.AppendLine();
-            template.Append("/// </summary>");
-            template.AppendLine();
-            template.AppendFormat("[Column(Storage = \"{0}\", Name = \"{1}\", DbType = \"NUMBER\", AutoSync = AutoSync.Never)]"
-                , _name, name);
-            template.AppendLine();
-            template.Append("[DebuggerNonUserCode()]");
-            template.AppendLine();
-            template.AppendFormat("public System.Nullable<decimal> {0}", name);
-            template.AppendLine();
-            template.Append("{get{");
-            template.AppendLine();
-            template.AppendFormat("return this.{0};", _name);
-            template.AppendLine();
-            template.Append("}set{");
-            template.AppendLine();
-            template.AppendFormat(" if (({0} == value) == false)",
-                _name);
-            template.AppendLine();
-            template.Append("{");
-            template.AppendLine();
-            template.AppendFormat("this.{0} = value;this.OnPropertyChanged(\"{1}\");", _name, name);
-            template.AppendLine();
-            template.Append("}}}");
+            try { 
+            string generateViewName=Convert.ToString((sender as ComboBox).SelectedValue);
 
-            return template;
-        }
+            Type generateViewType=this.GetType().Assembly.GetTypes().Single(p => p.Name == generateViewName);
+                if(generateViewType!=null)
+                {
+                    object generateView=Activator.CreateInstance(generateViewType);
+                    if(generateView!=null&&generateView is UserControl)
+                    {
+                        gridContent.Children.Clear();
+                        gridContent.Children.Add(generateView as UserControl);
+                    }
+                }
+                }catch(Exception){}
+            }
+
+        #endregion
+
+
+
     }
 }
