@@ -1,64 +1,62 @@
-﻿using System;  
-using System.Collections.Generic;  
-using System.Linq;  
-using System.Text;  
-using System.Windows;  
-using System.Windows.Controls;  
-using System.Windows.Data;  
-using System.Windows.Documents;  
-using System.Windows.Input;  
-using System.Windows.Media;  
-using System.Windows.Media.Imaging;  
-using System.Windows.Navigation;  
-using System.Windows.Shapes;  
-using System.Net;  
-using System.Configuration;  
-using System.IO;  
-using System.Diagnostics;  
-using System.Xml;  
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Net;
+using System.Configuration;
+using System.IO;
+using System.Diagnostics;
+using System.Xml;
 using ICSharpCode.SharpZipLib.Zip; 
 
-
-namespace GenerateProgrammeCode
+namespace AutoUpdate
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     public partial class MainWindow : Window
     {
-        #region===属性字段===
+
+        #region===字段属性===
         //更新包地址
         private string url = "";
         //文件名字
         private string filename = "";
         //下载文件存放全路径
         private string filepath = "";
+
         //更新后打开的程序名
         string startexe = "";
         //新版本号
         string version = "";
-
         #endregion
-
         public MainWindow()
         {
             InitializeComponent();
 
-            Process openupdatedexe = new Process();
-            openupdatedexe.StartInfo.FileName = "AutoUpdate.exe";
-            openupdatedexe.StartInfo.Arguments = "GenerateProgrammeCode.exe v.1.0";
-            openupdatedexe.Start();
+            if (Application.Current.Properties["startexe"] != null)
+            {
+                startexe = Application.Current.Properties["startexe"].ToString().Trim();
+            }
 
-            this.Close();
-            return;
-
-            this.Loaded += MainWindow_Loaded;
+            if (Application.Current.Properties["version"] != null)
+            {
+                version = Application.Current.Properties["version"].ToString().Trim();
+            }
         }
-
 
         private void Window_Activated(object sender, EventArgs e)
         {
-            url = ConfigurationSettings.AppSettings["Url"].Trim();
+            url = ConfigurationManager.AppSettings["Url"].Trim();
 
             if (url != "")
             {
@@ -137,19 +135,11 @@ namespace GenerateProgrammeCode
             }
         }
 
-        //private void pgbUpdate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        //{
-        //    pgbUpdate.Dispatcher.Invoke(new Action<DependencyProperty, object>(pgbUpdate.SetValue),
-        //        System.Windows.Threading.DispatcherPriority.Background, ProgressBar.ValueProperty, pgbUpdate.Value);
-        //}
-
         /// <summary>
         /// 下载更新包
         /// </summary>
         public void DownloadFile()
         {
-            //pgbUpdate.Value++;
-
             WebClient client = new WebClient();
             try
             {
@@ -172,16 +162,16 @@ namespace GenerateProgrammeCode
 
         private void UpdateVersionInfo()
         {
-            //try
-            //{
-            //    Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
-            //    cfa.AppSettings.Settings["Version"].Value = version;
-            //    cfa.Save();
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("更新版本信息出错：" + ex.Message);
-            //}
+            try
+            {
+                Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
+                cfa.AppSettings.Settings["Version"].Value = version;
+                cfa.Save();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("更新版本信息出错：" + ex.Message);
+            }
 
         }
 
@@ -190,19 +180,19 @@ namespace GenerateProgrammeCode
         /// </summary>
         private void OpenUpdatedExe()
         {
-            //try
-            //{
-            //    if (ConfigurationManager.AppSettings["StartAfterUpdate"] == "true" && startexe != "")
-            //    {
-            //        Process openupdatedexe = new Process();
-            //        openupdatedexe.StartInfo.FileName = startexe;
-            //        openupdatedexe.Start();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("打开更新后程序出错：" + ex.Message);
-            //}
+            try
+            {
+                if (ConfigurationManager.AppSettings["StartAfterUpdate"] == "true" && startexe != "")
+                {
+                    Process openupdatedexe = new Process();
+                    openupdatedexe.StartInfo.FileName = startexe;
+                    openupdatedexe.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("打开更新后程序出错：" + ex.Message);
+            }
         }
 
         #region 不好用
@@ -294,36 +284,5 @@ namespace GenerateProgrammeCode
             errorlog.Flush();
             errorlog.Close();
         }
-
-        #region===事件===
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Loaded -= MainWindow_Loaded;
-            cmbViewType.ItemsSource = new List<string> { "GenerateEntity", "GenerateTabOp" };
-            
-        }
-
-        private void cmbViewType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try { 
-            string generateViewName=Convert.ToString((sender as ComboBox).SelectedValue);
-
-            Type generateViewType=this.GetType().Assembly.GetTypes().Single(p => p.Name == generateViewName);
-                if(generateViewType!=null)
-                {
-                    object generateView=Activator.CreateInstance(generateViewType);
-                    if(generateView!=null&&generateView is UserControl)
-                    {
-                        gridContent.Children.Clear();
-                        gridContent.Children.Add(generateView as UserControl);
-                    }
-                }
-                }catch(Exception){}
-            }
-
-        #endregion
-
-
-
     }
 }

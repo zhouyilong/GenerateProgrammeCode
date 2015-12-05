@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateProgrammeCode", "GenerateProgrammeCode.csproj", "{32FF5A28-221A-4957-805A-D16BFB793756}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoUpdate", "AutoUpdate\AutoUpdate.csproj", "{3B476621-8B37-4AE9-8D5B-C3FFC3B4C4EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{32FF5A28-221A-4957-805A-D16BFB793756}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32FF5A28-221A-4957-805A-D16BFB793756}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32FF5A28-221A-4957-805A-D16BFB793756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B476621-8B37-4AE9-8D5B-C3FFC3B4C4EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B476621-8B37-4AE9-8D5B-C3FFC3B4C4EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B476621-8B37-4AE9-8D5B-C3FFC3B4C4EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B476621-8B37-4AE9-8D5B-C3FFC3B4C4EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
