@@ -1,22 +1,23 @@
-﻿using System;  
-using System.Collections.Generic;  
-using System.Linq;  
-using System.Text;  
-using System.Windows;  
-using System.Windows.Controls;  
-using System.Windows.Data;  
-using System.Windows.Documents;  
-using System.Windows.Input;  
-using System.Windows.Media;  
-using System.Windows.Media.Imaging;  
-using System.Windows.Navigation;  
-using System.Windows.Shapes;  
-using System.Net;  
-using System.Configuration;  
-using System.IO;  
-using System.Diagnostics;  
-using System.Xml;  
-using ICSharpCode.SharpZipLib.Zip; 
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Net;
+using System.Configuration;
+using System.IO;
+using System.Diagnostics;
+using System.Xml;
+using ICSharpCode.SharpZipLib.Zip;
+using Newtonsoft.Json.Linq;
 
 
 namespace GenerateProgrammeCode
@@ -38,251 +39,126 @@ namespace GenerateProgrammeCode
         //新版本号
         string version = "";
 
+        JObject serverJObject;
         #endregion
 
         public MainWindow()
         {
             InitializeComponent();
 
-            Process openupdatedexe = new Process();
-            openupdatedexe.StartInfo.FileName = "AutoUpdate.exe";
-            openupdatedexe.StartInfo.Arguments = "GenerateProgrammeCode.exe v.1.0";
-            openupdatedexe.Start();
-
-            this.Close();
-            return;
-
-            this.Loaded += MainWindow_Loaded;
-        }
-
-
-        private void Window_Activated(object sender, EventArgs e)
-        {
-            url = ConfigurationSettings.AppSettings["Url"].Trim();
-
-            if (url != "")
+            //检查是否有更新
+            bool isNeedUpdate = false;
+            bool isMustUpdate=false;
+            url = ConfigurationManager.AppSettings["Url"].Trim();
+            version = ConfigurationManager.AppSettings["Version"].Trim();
+            if (string.IsNullOrEmpty(version))
             {
-                filename = url.Substring(url.LastIndexOf("/") + 1);
-                //下载文件存放在临时文件夹中
-                filepath = Environment.GetEnvironmentVariable("TEMP") + @"/" + filename;
-
-                if (filename != "")
+                isNeedUpdate = true;
+            }
+            else if (!string.IsNullOrEmpty(url))
+            {
+                WebClient client = new WebClient();
+                try
                 {
-                    try
+                    Uri address = new Uri(url);
+
+                    string serverJson=client.DownloadString(address);
+                    serverJObject = JToken.Parse(serverJson) as JObject;
+
+
+                    //if(serverJObject!=null)
+                    //{
+
+                    //}
+
+                    string serverVersion = serverJObject["version"].ToString();
+                    if(!string.IsNullOrEmpty(serverVersion))
                     {
-                        KillExeProcess();
-                        DownloadFile();
-                        UnZipFile();
-                        UpdateVersionInfo();
-                        OpenUpdatedExe();
-
-                        writeLog("更新成功！");
-                    }
-                    catch (Exception ex)
-                    {
-                        writeLog(ex.Message);
-                    }
-
-                }
-                else
-                {
-                    writeLog("更新失败：下载的文件名为空！");
-                    return;
-                }
-            }
-
-            else
-            {
-                writeLog("更新失败：未在App.config中指定需要下载的文件位置！");
-            }
-
-            if (File.Exists(filepath))
-            {
-                File.Delete(filepath);
-            }
-
-            this.Close();
-        }
-
-        /// <summary>
-        /// 杀掉正在运行的需要更新的程序
-        /// </summary>
-        private void KillExeProcess()
-        {
-            //后缀起始位置
-            int startpos = -1;
-
-            try
-            {
-                if (startexe != "")
-                {
-                    if (startexe.EndsWith(".EXE"))
-                    {
-                        startpos = startexe.IndexOf(".EXE");
-                    }
-                    else if (startexe.EndsWith(".exe"))
-                    {
-                        startpos = startexe.IndexOf(".exe");
-                    }
-                    foreach (Process p in Process.GetProcessesByName(startexe.Remove(startpos)))
-                    {
-                        p.Kill();
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("清杀原程序进程出错：" + ex.Message);
-            }
-        }
-
-        //private void pgbUpdate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        //{
-        //    pgbUpdate.Dispatcher.Invoke(new Action<DependencyProperty, object>(pgbUpdate.SetValue),
-        //        System.Windows.Threading.DispatcherPriority.Background, ProgressBar.ValueProperty, pgbUpdate.Value);
-        //}
-
-        /// <summary>
-        /// 下载更新包
-        /// </summary>
-        public void DownloadFile()
-        {
-            //pgbUpdate.Value++;
-
-            WebClient client = new WebClient();
-            try
-            {
-                Uri address = new Uri(url);
-
-                if (File.Exists(filepath))
-                {
-                    File.Delete(filepath);
-                }
-                client.DownloadFile(address, filepath);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("下载更新文件出错：" + ex.Message);
-            }
-
-        }
-
-
-        private void UpdateVersionInfo()
-        {
-            //try
-            //{
-            //    Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
-            //    cfa.AppSettings.Settings["Version"].Value = version;
-            //    cfa.Save();
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("更新版本信息出错：" + ex.Message);
-            //}
-
-        }
-
-        /// <summary>
-        /// 打开更新后的程序
-        /// </summary>
-        private void OpenUpdatedExe()
-        {
-            //try
-            //{
-            //    if (ConfigurationManager.AppSettings["StartAfterUpdate"] == "true" && startexe != "")
-            //    {
-            //        Process openupdatedexe = new Process();
-            //        openupdatedexe.StartInfo.FileName = startexe;
-            //        openupdatedexe.Start();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("打开更新后程序出错：" + ex.Message);
-            //}
-        }
-
-        #region 不好用
-        /// <summary>
-        /// 解压压缩包，格式必须是*.zip,否则不能解压
-        /// 需要添加System32下的Shell32.dll
-        /// 不好用总是弹出来对话框
-        /// </summary>
-        //private void UnZip()
-        //{
-        //    try
-        //    {
-        //        ShellClass sc = new ShellClass();
-        //        Folder SrcFolder = sc.NameSpace(filepath);
-        //        Folder DestFolder = sc.NameSpace(System.Environment.CurrentDirectory);
-        //        FolderItems items = SrcFolder.Items();
-        //        DestFolder.CopyHere(items, 16);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("解压缩更新包出错：" + ex.Message, "提示信息", MessageBoxButton.OK, MessageBoxImage.Error);
-        //    }
-        //}
-        #endregion
-
-        #region 解压zip
-        /// <summary>
-        /// 解压压缩包，格式必须是*.zip,否则不能解压
-        /// </summary>
-        /// <returns></returns>
-        private void UnZipFile()
-        {
-            //pgbUpdate.Value++;
-
-            try
-            {
-                using (ZipInputStream zis = new ZipInputStream(File.OpenRead(filepath)))
-                {
-                    ZipEntry theEntry;
-                    while ((theEntry = zis.GetNextEntry()) != null)
-                    {
-                        string directoryName = System.IO.Path.GetDirectoryName(theEntry.Name);
-                        string zipfilename = System.IO.Path.GetFileName(theEntry.Name);
-
-                        if (directoryName.Length > 0 && !Directory.Exists(directoryName))
+                        string[] serverVersions = serverVersion.Replace("v","").Split('.');
+                        string[] versions=version.Replace("v","").Split('.');
+                        for(int i=0;i<serverVersions.Length;i++)
                         {
-                            Directory.CreateDirectory(directoryName);
-                        }
-
-                        if (zipfilename != String.Empty)
-                        {
-                            using (FileStream streamWriter = File.Create(theEntry.Name))
+                            if(versions.Length>=i+1)
                             {
-                                int size = 2048;
-                                byte[] data = new byte[2048];
-                                while (true)
+                                int serverNum = 0;
+                                int num=0;
+                                if (Int32.TryParse(serverVersions[i], out serverNum) && Int32.TryParse(versions[i], out num))
                                 {
-                                    size = zis.Read(data, 0, data.Length);
-                                    if (size > 0)
+                                    if(i==0)
                                     {
-                                        streamWriter.Write(data, 0, size);
+                                        if(serverNum>num)
+                                        {
+                                            isMustUpdate = true;
+                                            break;
+                                        }
                                     }
                                     else
                                     {
-                                        break;
+                                        if (serverNum > num)
+                                        {
+                                            isNeedUpdate = true;
+                                            break;
+                                        }
                                     }
+
+                                }
+                            }
+                            else 
+                            {
+                                int serverNum = 0;
+                                int num = 0;
+                                if (Int32.TryParse(serverVersions[versions.Length - 1], out serverNum) && Int32.TryParse(versions[versions.Length - 1], out num))
+                                {
+
+                                        if (serverNum == num)
+                                        {
+                                            isNeedUpdate = true;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+
                                 }
                             }
                         }
                     }
+
+                }
+                catch (Exception ex)
+                {
                 }
             }
-            catch (Exception ex)
-            {
-                throw new Exception("解压缩更新包出错：" + ex.Message);
-            }
 
+            if(isMustUpdate)
+            {
+                if (MessageBox.Show("存在必要更新，点击确定更新!","提示",MessageBoxButton.OK) == MessageBoxResult.OK)
+                {
+                    Process openupdatedexe = new Process();
+                    openupdatedexe.StartInfo.FileName = "AutoUpdate.exe";
+                    openupdatedexe.StartInfo.Arguments = "GenerateProgrammeCode.exe " + serverJObject["totalByes"].ToString();
+                    openupdatedexe.Start();
+
+                    this.Close();
+                }
+            }
+            else if(isNeedUpdate)
+            {
+                if (MessageBox.Show("存在更新，点击确定更新,点击取消不更新!\r\n更新日志：" + "\r\n" + serverJObject["log"].ToString(), "提示", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                {
+                    Process openupdatedexe = new Process();
+                    openupdatedexe.StartInfo.FileName = "AutoUpdate.exe";
+                    openupdatedexe.StartInfo.Arguments = "GenerateProgrammeCode.exe " + serverJObject["totalByes"].ToString();
+                    openupdatedexe.Start();
+
+                    this.Close();
+                }
+            }
+            
+
+            this.Loaded += MainWindow_Loaded;
         }
-        #endregion
 
         private void writeLog(string str)
         {
@@ -300,26 +176,28 @@ namespace GenerateProgrammeCode
         {
             this.Loaded -= MainWindow_Loaded;
             cmbViewType.ItemsSource = new List<string> { "GenerateEntity", "GenerateTabOp" };
-            
+
         }
 
         private void cmbViewType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try { 
-            string generateViewName=Convert.ToString((sender as ComboBox).SelectedValue);
+            try
+            {
+                string generateViewName = Convert.ToString((sender as ComboBox).SelectedValue);
 
-            Type generateViewType=this.GetType().Assembly.GetTypes().Single(p => p.Name == generateViewName);
-                if(generateViewType!=null)
+                Type generateViewType = this.GetType().Assembly.GetTypes().Single(p => p.Name == generateViewName);
+                if (generateViewType != null)
                 {
-                    object generateView=Activator.CreateInstance(generateViewType);
-                    if(generateView!=null&&generateView is UserControl)
+                    object generateView = Activator.CreateInstance(generateViewType);
+                    if (generateView != null && generateView is UserControl)
                     {
                         gridContent.Children.Clear();
                         gridContent.Children.Add(generateView as UserControl);
                     }
                 }
-                }catch(Exception){}
             }
+            catch (Exception) { }
+        }
 
         #endregion
 
