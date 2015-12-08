@@ -16,7 +16,7 @@ using System.Configuration;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
-using ICSharpCode.SharpZipLib.Zip; 
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace AutoUpdate
 {
@@ -36,8 +36,8 @@ namespace AutoUpdate
 
         //更新后打开的程序名
         string startexe = "";
-        //新版本号
-        string version = "";
+        //下载包大小
+        int totalByes = 0;
         #endregion
         public MainWindow()
         {
@@ -48,10 +48,12 @@ namespace AutoUpdate
                 startexe = Application.Current.Properties["startexe"].ToString().Trim();
             }
 
-            if (Application.Current.Properties["version"] != null)
+            if (Application.Current.Properties["totalByes"] != null)
             {
-                version = Application.Current.Properties["version"].ToString().Trim();
+                Int32.TryParse(Application.Current.Properties["totalByes"].ToString().Trim(), out totalByes);
+
             }
+
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -70,11 +72,11 @@ namespace AutoUpdate
                     {
                         KillExeProcess();
                         DownloadFile();
-                        UnZipFile();
-                        UpdateVersionInfo();
-                        OpenUpdatedExe();
+                        //UnZipFile();
+                        //UpdateVersionInfo();
+                        //OpenUpdatedExe();
 
-                        writeLog("更新成功！");
+                        //writeLog("更新成功！");
                     }
                     catch (Exception ex)
                     {
@@ -94,12 +96,12 @@ namespace AutoUpdate
                 writeLog("更新失败：未在App.config中指定需要下载的文件位置！");
             }
 
-            if (File.Exists(filepath))
-            {
-                File.Delete(filepath);
-            }
+            //if (File.Exists(filepath))
+            //{
+            //    File.Delete(filepath);
+            //}
 
-            this.Close();
+            //this.Close();
         }
 
         /// <summary>
@@ -149,7 +151,43 @@ namespace AutoUpdate
                 {
                     File.Delete(filepath);
                 }
-                client.DownloadFile(address, filepath);
+                client.DownloadFileAsync(address, filepath);
+                client.DownloadFileCompleted += (sender, e) =>
+                {
+                    try
+                    {
+                        UnZipFile();
+                        if (File.Exists(filepath))
+                        {
+                            File.Delete(filepath);
+                        }
+                        if (MessageBox.Show("下载完成，是否打开更新后的程序!", "提示", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                        {
+                            OpenUpdatedExe();
+
+                            this.Close();
+                        }
+                        else
+                        {
+                            this.Close();
+                        }
+                        writeLog("更新成功！");
+                    }
+                    catch (Exception ex)
+                    {
+                        writeLog(ex.Message);
+                    }          
+
+                };
+                client.DownloadProgressChanged += (sender, e) =>
+                {
+                    if (totalByes>0)
+                    {
+                        double percent = ((double)e.BytesReceived / totalByes) * 100;
+                        progressBar.Value = percent;
+                    }
+                };
+
 
             }
             catch (Exception ex)
@@ -162,16 +200,16 @@ namespace AutoUpdate
 
         private void UpdateVersionInfo()
         {
-            try
-            {
-                Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
-                cfa.AppSettings.Settings["Version"].Value = version;
-                cfa.Save();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("更新版本信息出错：" + ex.Message);
-            }
+            //try
+            //{
+            //    Configuration cfa = ConfigurationManager.OpenExeConfiguration(startexe);
+            //    cfa.AppSettings.Settings["Version"].Value = version;
+            //    cfa.Save();
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("更新版本信息出错：" + ex.Message);
+            //}
 
         }
 
@@ -226,8 +264,6 @@ namespace AutoUpdate
         /// <returns></returns>
         private void UnZipFile()
         {
-            //pgbUpdate.Value++;
-
             try
             {
                 using (ZipInputStream zis = new ZipInputStream(File.OpenRead(filepath)))

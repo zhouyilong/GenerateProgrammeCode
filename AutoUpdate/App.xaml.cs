@@ -20,11 +20,7 @@ namespace AutoUpdate
             if (e.Args != null && e.Args.Count() > 0)
             {
                 this.Properties["startexe"] = e.Args[0];
-                this.Properties["version"] = e.Args[1];
-
-                MessageBox.Show(e.Args[0].ToString());
-
-                MessageBox.Show(e.Args[1].ToString());
+                this.Properties["totalByes"] = e.Args[1];
             }
             base.OnStartup(e);
         }  
