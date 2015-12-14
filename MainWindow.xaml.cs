@@ -30,12 +30,6 @@ namespace GenerateProgrammeCode
         #region===属性字段===
         //更新包地址
         private string url = "";
-        //文件名字
-        private string filename = "";
-        //下载文件存放全路径
-        private string filepath = "";
-        //更新后打开的程序名
-        string startexe = "";
         //新版本号
         string version = "";
 
@@ -160,22 +154,14 @@ namespace GenerateProgrammeCode
             this.Loaded += MainWindow_Loaded;
         }
 
-        private void writeLog(string str)
-        {
-
-            string strLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + str + "/r/n";
-
-            StreamWriter errorlog = new StreamWriter(System.IO.Path.Combine(Environment.CurrentDirectory, @"log.txt"), true);
-            errorlog.Write(strLog);
-            errorlog.Flush();
-            errorlog.Close();
-        }
-
         #region===事件===
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= MainWindow_Loaded;
-            cmbViewType.ItemsSource = new List<string> { "GenerateEntity", "GenerateTabOp" };
+            cmbViewType.ItemsSource = new List<ViewType> { new ViewType(){ Desc="生成Linq类实体",Value= "GenerateEntity"},
+                new ViewType(){ Desc="生成TableOp",Value= "GenerateTabOp"} };
+            cmbViewType.SelectedValuePath = "Value";
+            cmbViewType.DisplayMemberPath = "Desc";
 
         }
 
@@ -183,7 +169,8 @@ namespace GenerateProgrammeCode
         {
             try
             {
-                string generateViewName = Convert.ToString((sender as ComboBox).SelectedValue);
+                ViewType viewType = (sender as ComboBox).SelectedItem as ViewType;
+                string generateViewName = viewType.Value;
 
                 Type generateViewType = this.GetType().Assembly.GetTypes().Single(p => p.Name == generateViewName);
                 if (generateViewType != null)
@@ -201,6 +188,19 @@ namespace GenerateProgrammeCode
 
         #endregion
 
+
+        class ViewType
+        {
+            /// <summary>
+            /// 显示值
+            /// </summary>
+            public string Desc { get; set; }
+
+            /// <summary>
+            /// 实际值
+            /// </summary>
+            public string Value { get; set; }
+        }
 
 
     }
