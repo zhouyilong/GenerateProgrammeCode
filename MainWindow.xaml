@@ -1,9 +1,11 @@
 ﻿<Window x:Class="GenerateProgrammeCode.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wcfview="clr-namespace:GenerateProgrammeCode.CSharp.WCF.View"
-        Title="GenerateCodeV1.1" Height="600" Width="800">
-    <Grid>
+        Title="" Height="600" Width="800"
+        xmlns:xceed="http://schemas.xceed.com/wpf/xaml/toolkit" WindowStartupLocation="CenterScreen" Icon="Images/Panda.ico"    
+        >
+    <xceed:BusyIndicator Name="MyBusyIndicator">
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -18,5 +20,5 @@
         <Grid Name="gridContent" Grid.Row="1"></Grid>
 
     </Grid>
-
+    </xceed:BusyIndicator>
 </Window>
