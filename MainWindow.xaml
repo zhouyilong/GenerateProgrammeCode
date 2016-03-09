@@ -4,21 +4,41 @@
         Title="" Height="600" Width="800"
         xmlns:xceed="http://schemas.xceed.com/wpf/xaml/toolkit" WindowStartupLocation="CenterScreen" Icon="Images/Panda.ico"    
         >
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5,4,4,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox" >
+            <Setter Property="Margin" Value="2,3,0,4"/>
+            <Setter Property="MinHeight" Value="23"/>
+        </Style>
+        <Style TargetType="ComboBox" >
+            <Setter Property="Margin" Value="2,3,5,4"/>
+            <Setter Property="MinHeight" Value="23"/>
+        </Style>
+    </Window.Resources>
     <xceed:BusyIndicator Name="MyBusyIndicator">
         <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <!--<ColumnDefinition Width="*"></ColumnDefinition>-->
-            </Grid.ColumnDefinitions>
-            <ComboBox Name="cmbViewType" Grid.Column="0"  SelectionChanged="cmbViewType_SelectionChanged"></ComboBox>
-        </Grid>
-        <Grid Name="gridContent" Grid.Row="1"></Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="2*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="2*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="语言分类" Grid.Column="0" ></TextBlock>
+                <ComboBox Name="cmbLanguageType" Grid.Column="1"  SelectionChanged="cmbLanguageType_SelectionChanged"></ComboBox>
+                <TextBlock Text="详细类别" Grid.Column="2"></TextBlock>
+                <ComboBox Name="cmbViewType" Grid.Column="3"  SelectionChanged="cmbViewType_SelectionChanged"></ComboBox>
+            </Grid>
+            <Grid Name="gridContent" Grid.Row="1"></Grid>
 
-    </Grid>
+        </Grid>
     </xceed:BusyIndicator>
 </Window>

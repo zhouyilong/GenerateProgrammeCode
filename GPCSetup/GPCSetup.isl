@@ -1888,7 +1888,6 @@
 		<row><td>File</td><td>Component</td><td>AutoUpdate.主输出</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;AutoUpdate&gt;|Built</td><td>3</td><td/></row>
 		<row><td>generateprogrammecode.exe</td><td>GenerateProgrammeCode.exe</td><td>GENERA~1.EXE|GenerateProgrammeCode.exe</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\GenerateProgrammeCode.exe</td><td>1</td><td/></row>
 		<row><td>generateprogrammecode.exe.co</td><td>ISX_DEFAULTCOMPONENT</td><td>GENERA~1.CON|GenerateProgrammeCode.exe.config</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\GenerateProgrammeCode.exe.config</td><td>1</td><td/></row>
-		<row><td>generateprogrammecode.exe.ma</td><td>ISX_DEFAULTCOMPONENT</td><td>GENERA~1.MAN|GenerateProgrammeCode.exe.manifest</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\GenerateProgrammeCode.exe.manifest</td><td>1</td><td/></row>
 		<row><td>icsharpcode.sharpziplib.dll</td><td>ICSharpCode.SharpZipLib.dll</td><td>ICSHAR~1.DLL|ICSharpCode.SharpZipLib.dll</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\ICSharpCode.SharpZipLib.dll</td><td>1</td><td/></row>
 		<row><td>newtonsoft.json.dll</td><td>Newtonsoft.Json.dll</td><td>NEWTON~1.DLL|Newtonsoft.Json.dll</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\Newtonsoft.Json.dll</td><td>1</td><td/></row>
 		<row><td>xceed.wpf.toolkit.dll</td><td>Xceed.Wpf.Toolkit.dll</td><td>XCEEDW~1.DLL|Xceed.Wpf.Toolkit.dll</td><td>0</td><td/><td/><td/><td>1</td><td>F:\WorkSpace\work\practice\GenerateProgrammeCode\bin\Release\Xceed.Wpf.Toolkit.dll</td><td>1</td><td/></row>
@@ -2659,7 +2658,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1033</td><td>zhouyilong</td><td>0</td><td/><td>-1859874735</td></row>
+		<row><td>COMPANY_NAME</td><td>1033</td><td>zhouyilong</td><td>0</td><td/><td>1235524368</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_DOTNETVERSION40FULL</td><td>1033</td><td>Microsoft .NET Framework 4.0 Full package or greater needs to be installed for this installation to continue.</td><td>0</td><td/><td>-1859905423</td></row>
@@ -3473,6 +3472,7 @@
 		<row><td>IDS_SETUPEXE_EXPIRE_MSG</td><td>1033</td><td>This setup works until %s. The setup will now exit.</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS_SETUPEXE_LAUNCH_COND_E</td><td>1033</td><td>This setup was built with an evaluation version of InstallShield and can only be launched from setup.exe.</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS_SHORTCUT_DISPLAY_NAME1</td><td>1033</td><td>GenerateCode</td><td>0</td><td/><td>-1859866159</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME2</td><td>1033</td><td>LAUNCH~1.EXE|Launch GenerateProgrammeCode.exe</td><td>0</td><td/><td>1235514192</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO</td><td>1033</td><td>From the list of servers below, select the database server you would like to target.</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_DB</td><td>1033</td><td>From the list of catalog names below, select the database catalog you would like to target.</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_TEMPLATE</td><td>1033</td><td>[IS_SQLBROWSE_INTRO]</td><td>0</td><td/><td>-1859874735</td></row>
@@ -3761,8 +3761,8 @@
 		<row><td>IDS__TargetReq_DESC_PROCESSOR</td><td>1033</td><td>The processor is not adequate for running [ProductName].</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>-1859874735</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>-1859874735</td></row>
-		<row><td>ID_STRING1</td><td>1033</td><td>http://www.zhouyilong.com</td><td>0</td><td/><td>-1859874735</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>zhouyilong</td><td>0</td><td/><td>-1859874735</td></row>
+		<row><td>ID_STRING1</td><td>1033</td><td>http://www.zhouyilong.com</td><td>0</td><td/><td>1235524368</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>zhouyilong</td><td>0</td><td/><td>1235524368</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>LAUNCH~1.EXE|Launch GenerateProgrammeCode.exe</td><td>0</td><td/><td>-1859897199</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1033</td><td>This feature will remain uninstalled.</td><td>0</td><td/><td>-1859874735</td></row>
 	</table>
@@ -4006,7 +4006,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>ISTheme</td><td>InstallShield Blue.theme</td></row>
 		<row><td>ISUSLock</td><td>{72293E3F-8EA8-45B7-AB49-5BC061EF6B9B}</td></row>
 		<row><td>ISUSSignature</td><td>{CE9ABAFC-D70C-46F1-B176-F0A5B359806B}</td></row>
-		<row><td>ISVisitedViews</td><td>viewAssistant</td></row>
+		<row><td>ISVisitedViews</td><td>viewAssistant,viewShortcuts,viewFileExtensions,viewAppV,viewUI,viewFeatureFiles,viewAppFiles,viewSetupDesign,viewProject,viewDesignPatches,viewRelease,viewSupportFiles</td></row>
 		<row><td>Limited</td><td>1</td></row>
 		<row><td>LockPermissionMode</td><td>1</td></row>
 		<row><td>MsiExecCmdLineOptions</td><td/></row>
@@ -4351,6 +4351,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>IS_SQLSERVER_SERVER</td><td/><td/></row>
 		<row><td>IS_SQLSERVER_USERNAME</td><td>sa</td><td/></row>
 		<row><td>InstallChoice</td><td>AR</td><td/></row>
+		<row><td>LAUNCHPROGRAM</td><td>1</td><td/></row>
 		<row><td>LAUNCHREADME</td><td>1</td><td/></row>
 		<row><td>Manufacturer</td><td>##COMPANY_NAME##</td><td/></row>
 		<row><td>PIDKEY</td><td/><td/></row>
@@ -4392,7 +4393,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>RestartManagerOption</td><td>CloseRestart</td><td/></row>
 		<row><td>SERIALNUMBER</td><td/><td/></row>
 		<row><td>SERIALNUMVALSUCCESSRETVAL</td><td>1</td><td/></row>
-		<row><td>SHOWLAUNCHPROGRAM</td><td>0</td><td/></row>
+		<row><td>SHOWLAUNCHPROGRAM</td><td>-1</td><td/></row>
 		<row><td>SecureCustomProperties</td><td>ISFOUNDNEWERPRODUCTVERSION;USERNAME;COMPANYNAME;ISX_SERIALNUM;SUPPORTDIR;DOTNETVERSION40FULL</td><td/></row>
 		<row><td>SelectedSetupType</td><td>##IDS__DisplayName_Typical##</td><td/></row>
 		<row><td>SetupType</td><td>Typical</td><td/></row>

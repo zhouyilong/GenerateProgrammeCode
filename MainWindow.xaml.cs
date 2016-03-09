@@ -51,6 +51,14 @@ namespace GenerateProgrammeCode
 
             this.Title = "生成代码" + version;
 
+            cmbLanguageType.ItemsSource = new List<ViewType> { 
+                 new ViewType(){ Desc="Silverlight",Value= "Silverlight"},
+                  new ViewType(){ Desc="WCF",Value= "WCF"},
+                new ViewType(){ Desc="Oracle",Value= "Oracle"}};
+            cmbLanguageType.SelectedValuePath = "Value";
+            cmbLanguageType.DisplayMemberPath = "Desc";
+
+
 
             cmbViewType.ItemsSource = new List<ViewType> { 
                 new ViewType(){ Desc="生成Linq类实体",Value= "GenerateEntity"},
@@ -82,6 +90,28 @@ namespace GenerateProgrammeCode
             catch (Exception) { }
         }
 
+        private void cmbLanguageType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ViewType viewType = (sender as ComboBox).SelectedItem as ViewType;
+            List<ViewType> viewTypeList = new List<ViewType> { };
+
+
+            switch (viewType.Value)
+            {
+                case "WCF":
+                    viewTypeList.Add(new ViewType() { Desc = "生成TableOp", Value = "GenerateTabOp" });
+                    viewTypeList.Add(new ViewType() { Desc = "生成Linq类实体", Value = "GenerateEntity" });
+                    break;
+                case "Oracle":
+                    viewTypeList.Add(new ViewType() { Desc = "生成域配置执行SQL", Value = "GenerateSXGISMIS" });
+                    break;
+            }
+
+            cmbViewType.ItemsSource = viewTypeList;
+            cmbViewType.SelectedValuePath = "Value";
+            cmbViewType.DisplayMemberPath = "Desc";
+
+        }
         #endregion
 
         #region===类公共方法===
@@ -221,5 +251,6 @@ namespace GenerateProgrammeCode
             /// </summary>
             public string Value { get; set; }
         }
+
     }
 }
