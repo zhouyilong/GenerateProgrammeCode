@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Net;
 using System.Configuration;
-using System.IO;
 using System.Diagnostics;
-using System.Xml;
-using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json.Linq;
-
+using GenerateProgrammeCode.Storage;
 
 namespace GenerateProgrammeCode
 {
@@ -104,6 +93,7 @@ namespace GenerateProgrammeCode
                     break;
                 case "Oracle":
                     viewTypeList.Add(new ViewType() { Desc = "生成域配置执行SQL", Value = "GenerateSXGISMIS" });
+                    viewTypeList.Add(new ViewType() { Desc = "生成自动编码执行SQL", Value = "GenerateAutoCode" });
                     break;
             }
 
@@ -135,13 +125,16 @@ namespace GenerateProgrammeCode
                 //下载软件版本号
                 webClient.DownloadStringCompleted += webClient_DownloadStringCompleted;
                 MyBusyIndicator.IsBusy = true;
+
                 webClient.DownloadStringAsync(address);
+                
             }
         }
 
         //从服务器中下载版本号完成后执行
         void webClient_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
+            LogHelper.WriteLog("gggs");
             if (e.Error == null)
             {
                 try

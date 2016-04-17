@@ -222,9 +222,22 @@ namespace AutoUpdate
             {
                 if (ConfigurationManager.AppSettings["StartAfterUpdate"] == "true" && startexe != "")
                 {
-                    Process openupdatedexe = new Process();
-                    openupdatedexe.StartInfo.FileName = startexe;
-                    openupdatedexe.Start();
+                    //Process openupdatedexe = new Process();
+                    //openupdatedexe.StartInfo.FileName = startexe;
+                    //openupdatedexe.Start();
+
+                    //创建启动对象
+                    System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+                    startInfo.UseShellExecute = true;
+                    startInfo.WorkingDirectory = Environment.CurrentDirectory;
+                    //设置运行文件
+                    startInfo.FileName = startexe;
+                    //设置启动参数
+                    //startInfo.Arguments = String.Join(" ", Args);
+                    //设置启动动作,确保以管理员身份运行
+                    startInfo.Verb = "runas";
+                    //如果不是管理员，则启动UAC
+                    System.Diagnostics.Process.Start(startInfo);
                 }
             }
             catch (Exception ex)

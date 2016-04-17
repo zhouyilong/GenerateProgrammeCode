@@ -8,7 +8,32 @@ namespace GenerateProgrammeCode.Storage
 {
     public class CommonHelper
     {
+        /// <summary>
+        /// <para>下载文件的内容</para>
+        /// <para>by zhouyilong 20160415</para>
+        /// </summary>
+        /// <returns>文件中的数据</returns>
+        public static string LoadFileText(string filePath, Encoding encoding)
+        {
+            string result = string.Empty;
+            FileStream fs;
+            if (File.Exists(filePath))
+            {
+                fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                using (fs)
+                {
 
+                    StreamReader streamReader = new StreamReader(fs, encoding);
+
+                    result = streamReader.ReadToEnd();
+                    streamReader.Close();
+                    streamReader.Dispose();
+                }
+
+            }
+
+            return result;
+        }
     }
 
     /// <summary>

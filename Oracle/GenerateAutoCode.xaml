@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="GenerateProgrammeCode.Oracle.GenerateAutoCode"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GenerateProgrammeCode.Oracle"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="500" Background="White">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinHeight" Value="23"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Height" Value="23"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Height" Value="23"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid Background="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!--显示生成代码区域-->
+            <RichTextBox Name="rtbCode" Grid.Row="2"  Grid.Column="0" Grid.ColumnSpan="8" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
+            </RichTextBox>
+
+            <TextBlock Text="域编码：" Grid.Row="0" Grid.Column="0"></TextBlock>
+            <TextBox Name="tbCode" Grid.Row="0" Grid.Column="1"></TextBox>
+
+            <TextBlock Text="字段名：" Grid.Row="0" Grid.Column="2"></TextBlock>
+            <TextBox Name="tbField" Grid.Row="0" Grid.Column="3"></TextBox>
+
+            <TextBlock Text="前缀：" Grid.Row="0" Grid.Column="4"></TextBlock>
+            <TextBox Name="tbPre" Grid.Row="0" Grid.Column="5"></TextBox>
+
+            <TextBlock Text="自增长长度：" Grid.Row="0" Grid.Column="6"></TextBlock>
+            <TextBox Name="tbLength" Grid.Row="0" Grid.Column="7"></TextBox>
+
+            <TextBlock Text="是否使用表：" Grid.Row="1" Grid.Column="0"></TextBlock>
+            <ComboBox Name="cmbIsUseTable" Grid.Row="1" Grid.Column="1"></ComboBox>
+
+            <TextBlock Name="tbkMax" Text="最大值：" Grid.Row="1" Grid.Column="2"></TextBlock>
+            <TextBox Name="tbMax" Grid.Row="1" Grid.Column="3"></TextBox>
+
+            <TextBlock Name="tbkTable" Text="表名：" Grid.Row="1" Grid.Column="2"></TextBlock>
+            <TextBox Name="tbTable" Grid.Row="1" Grid.Column="3"></TextBox>
+
+            <Button Name="btnGenerateAuto" Content="生成" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="4" Click="btnGenerateAuto_Click" ></Button>
+        </Grid>
+    </Grid>
+</UserControl>
