@@ -8,6 +8,8 @@ using System.Configuration;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using GenerateProgrammeCode.Storage;
+using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace GenerateProgrammeCode
 {
@@ -16,7 +18,7 @@ namespace GenerateProgrammeCode
     /// </summary>
     public partial class MainWindow : Window
     {
-        #region===属性字段===
+        #region 属性字段
         //更新包地址
         private string url = "";
         //新版本号
@@ -31,7 +33,7 @@ namespace GenerateProgrammeCode
             this.Loaded += MainWindow_Loaded;
         }
 
-        #region===事件===
+        #region 事件
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= MainWindow_Loaded;
@@ -104,10 +106,15 @@ namespace GenerateProgrammeCode
         }
         #endregion
 
-        #region===类公共方法===
-        //检查是否有更新
+        #region 类公共方法
+        //是否需要更新
         bool isNeedUpdate = false;
+        //是否必须更新
         bool isMustUpdate = false;
+        //是否更新自动更新程序
+        bool isUpdateAutoUpdate = false;
+
+        //检查是否有更新
         void CheckUpdate()
         {
             url = ConfigurationManager.AppSettings["Url"].Trim();
@@ -127,14 +134,19 @@ namespace GenerateProgrammeCode
                 MyBusyIndicator.IsBusy = true;
 
                 webClient.DownloadStringAsync(address);
-                
+
             }
         }
 
         //从服务器中下载版本号完成后执行
         void webClient_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
-            LogHelper.WriteLog("gggs");
+            /*
+             * 版本号类似 v1.4.3
+             * 当第1位发生改变时，需要强制更新程序
+             * 其他位发生数字变大时，将会进行更新提示，可不进行更新
+             * 当第2位发生改变时，需要更新自动更新程序
+             * */
             if (e.Error == null)
             {
                 try
@@ -160,6 +172,8 @@ namespace GenerateProgrammeCode
                                     {
                                         if (serverNum > num)
                                         {
+                                            //强制更新时，需要更新自动更新程序
+                                            isUpdateAutoUpdate = true;
                                             isMustUpdate = true;
                                             break;
                                         }
@@ -168,6 +182,12 @@ namespace GenerateProgrammeCode
                                     {
                                         if (serverNum > num)
                                         {
+                                            //当第2位发生改变时，需要更新自动更新程序
+                                            if (i == 1)
+                                            {
+                                                isUpdateAutoUpdate = true;
+                                            }
+
                                             isNeedUpdate = true;
                                             break;
                                         }
@@ -197,9 +217,44 @@ namespace GenerateProgrammeCode
                         }
                     }
 
+                    //更新主体程序前，更新自动更新程序
+                    if (isUpdateAutoUpdate)
+                    {
+                        if (ConfigurationManager.AppSettings.AllKeys.Contains("AutoUpdateUrl"))
+                        {
+                            string url = ConfigurationManager.AppSettings["AutoUpdateUrl"].Trim();
+                            string filename = url.Substring(url.LastIndexOf("/") + 1);
+                            //下载文件存放在临时文件夹中
+                            string filepath = Environment.GetEnvironmentVariable("TEMP") + @"/" + filename;
+
+                            if (!string.IsNullOrEmpty(filename))
+                            {
+                                try
+                                {
+                                    KillExeProcess();
+                                    DownloadFile(url, filepath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    writeLog(ex.Message);
+                                }
+                            }
+                            else
+                            {
+                                writeLog("AutoUpdate更新失败：下载的文件名为空！");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            writeLog("AutoUpdate更新失败：未在App.config中指定需要下载的文件位置！");
+                            return;
+                        }
+                    }
+
                     if (isMustUpdate)
                     {
-                        if (MessageBox.Show("存在必要更新，点击确定更新!", "提示", MessageBoxButton.OK) == MessageBoxResult.OK)
+                        if (MessageBox.Show("存在必要更新，点击确定更新!\r\n更新日志：" + "\r\n" + serverJObject["log"].ToString(), "提示", MessageBoxButton.OK) == MessageBoxResult.OK)
                         {
                             Process openupdatedexe = new Process();
                             openupdatedexe.StartInfo.FileName = "AutoUpdate.exe";
@@ -230,8 +285,129 @@ namespace GenerateProgrammeCode
 
             MyBusyIndicator.IsBusy = false;
         }
+
+        /// <summary>
+        /// 杀掉正在运行的需要更新的程序
+        /// </summary>
+        void KillExeProcess()
+        {
+            try
+            {
+                foreach (Process p in Process.GetProcessesByName("AutoUpdate"))
+                {
+                    p.Kill();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("清杀原程序进程出错：" + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 下载更新包
+        /// </summary>
+        void DownloadFile(string fileUrl, string filepath)
+        {
+            WebClient client = new WebClient();
+            try
+            {
+                Uri address = new Uri(fileUrl);
+
+                if (File.Exists(filepath))
+                {
+                    File.Delete(filepath);
+                }
+                client.DownloadFileAsync(address, filepath);
+                client.DownloadFileCompleted += (sender, e) =>
+                {
+                    try
+                    {
+                        UnZipFile(filepath);
+                        if (File.Exists(filepath))
+                        {
+                            File.Delete(filepath);
+                        }
+                        writeLog("更新AutoUpdate成功！");
+                    }
+                    catch (Exception ex)
+                    {
+                        writeLog(ex.Message);
+                    }
+
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("下载AutoUpdate更新文件出错：" + ex.Message);
+            }
+
+        }
+
+        /// <summary>
+        /// 解压压缩包，格式必须是*.zip,否则不能解压
+        /// </summary>
+        /// <returns></returns>
+        void UnZipFile(string filepath)
+        {
+            try
+            {
+                using (ZipInputStream zis = new ZipInputStream(File.OpenRead(filepath)))
+                {
+                    ZipEntry theEntry;
+                    while ((theEntry = zis.GetNextEntry()) != null)
+                    {
+                        string directoryName = System.IO.Path.GetDirectoryName(theEntry.Name);
+                        string zipfilename = System.IO.Path.GetFileName(theEntry.Name);
+
+                        if (directoryName.Length > 0 && !Directory.Exists(directoryName))
+                        {
+                            Directory.CreateDirectory(directoryName);
+                        }
+
+                        if (zipfilename != String.Empty)
+                        {
+                            using (FileStream streamWriter = File.Create(theEntry.Name))
+                            {
+                                int size = 2048;
+                                byte[] data = new byte[2048];
+                                while (true)
+                                {
+                                    size = zis.Read(data, 0, data.Length);
+                                    if (size > 0)
+                                    {
+                                        streamWriter.Write(data, 0, size);
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("解压缩更新包出错：" + ex.Message);
+            }
+
+        }
+
+        private void writeLog(string str)
+        {
+
+            string strLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + str + "/r/n";
+
+            StreamWriter errorlog = new StreamWriter(System.IO.Path.Combine(Environment.CurrentDirectory, @"log.txt"), true);
+            errorlog.Write(strLog);
+            errorlog.Flush();
+            errorlog.Close();
+        }
         #endregion
 
+        #region 内部类
         class ViewType
         {
             /// <summary>
@@ -244,6 +420,7 @@ namespace GenerateProgrammeCode
             /// </summary>
             public string Value { get; set; }
         }
+        #endregion
 
     }
 }

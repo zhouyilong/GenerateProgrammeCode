@@ -54,6 +54,8 @@ namespace AutoUpdate
 
             }
 
+            writeLog("filepath");
+
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -197,7 +199,6 @@ namespace AutoUpdate
 
         }
 
-
         private void UpdateVersionInfo()
         {
             //try
@@ -317,7 +318,7 @@ namespace AutoUpdate
             }
             catch (Exception ex)
             {
-                throw new Exception("解压缩更新包出错：" + ex.Message);
+                throw new Exception("解压缩更新包出错：" + ex.Message + filepath);
             }
 
         }
